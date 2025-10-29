@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AZ-104 Q/A Gallery</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root { --maxw: 1200px; --gap: 12px; --bg:#0f172a; --card:#111827; --text:#e5e7eb; }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    header{max-width:var(--maxw);margin:16px auto;padding:0 12px}
+    h1{font-size:1.25rem;margin:0 0 6px}
+    p.sub{margin:0 0 12px;opacity:.85}
+    .grid{max-width:var(--maxw);margin:8px auto 32px;padding:0 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--gap)}
+    figure{margin:0;background:var(--card);border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+    img{display:block;width:100%;height:auto;background:#0b1022;transition:opacity .35s ease;opacity:0}
+    img.loaded{opacity:1}
+    figcaption{font-size:.9rem;padding:8px 10px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;gap:8px;color:#cbd5e1}
+    .badge{font-size:.75rem;opacity:.9}
+    @media (max-width:520px){.grid{grid-template-columns:1fr 1fr}}
+    @media (max-width:360px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header>
+  <h1>AZ-104 Q/A Gallery</h1>
+  <p class="sub">700 images with native lazy-loading and proper dimensions for smooth scrolling.</p>
+</header>
+
+<main class="grid" id="gallery"></main>
+
+<script>
+  // Configuration: adjust counts and filename pattern as needed.
+  const total = 700;                 // how many questions/answers
+  const basePath = 'images/';        // folder where images live
+  const qPrefix = 'az-104-q-';       // question filename prefix
+  const aPrefix = 'az-104-a-';       // answer filename prefix
+  const ext = '.png';                // file extension
+  const w = 800, h = 600;            // intrinsic dimensions for sizing
+
+  // Helper for zero-padding numbers like 001, 002, ...
+  const pad3 = n => String(n).padStart(3, '0');
+
+  // Render minimal HTML first; let the browser lazy-load images on demand
+  const gallery = document.getElementById('gallery');
+
+  // Create first hero item (Q 001) with higher priority to improve LCP
+  function heroFigure() {
+    const fig = document.createElement('figure');
+    fig.innerHTML = `
+      <img src="${basePath}${qPrefix}${pad3(1)}${ext}"
+           alt="AZ-104 Question ${pad3(1)}"
+           width="${w}" height="${h}"
+           loading="eager" fetchpriority="high" decoding="auto">
+      <figcaption><span>Q ${pad3(1)}</span><span class="badge">Question</span></figcaption>`;
+    return fig;
+  }
+
+  gallery.appendChild(heroFigure());
+
+  // Add remaining items (Q and A pairs), lazy by default
+  for (let i = 1; i <= total; i++) {
+    // Skip Q 001 because it's already appended as hero
+    if (i !== 1) {
+      const qFig = document.createElement('figure');
+      qFig.innerHTML = `
+        <img src="${basePath}${qPrefix}${pad3(i)}${ext}"
+             alt="AZ-104 Question ${pad3(i)}"
+             width="${w}" height="${h}"
+             loading="lazy" decoding="async">
+        <figcaption><span>Q ${pad3(i)}</span><span class="badge">Question</span></figcaption>`;
+      gallery.appendChild(qFig);
+    }
+
+    // Add corresponding Answer image
+    const aFig = document.createElement('figure');
+    aFig.innerHTML = `
+      <img src="${basePath}${aPrefix}${pad3(i)}${ext}"
+           alt="AZ-104 Answer ${pad3(i)}"
+           width="${w}" height="${h}"
+           loading="lazy" decoding="async">
+      <figcaption><span>A ${pad3(i)}</span><span class="badge">Answer</span></figcaption>`;
+    gallery.appendChild(aFig);
+  }
+
+  // Fade-in effect when images finish decoding
+  const onLoad = img => img.classList.add('loaded');
+  document.addEventListener('load', e => {
+    if (e.target.tagName === 'IMG') onLoad(e.target);
+  }, true);
+
+  // For cached images loaded immediately
+  document.querySelectorAll('img').forEach(img => {
+    if (img.complete) onLoad(img);
+  });
+</script>
+</body>
+</html>
