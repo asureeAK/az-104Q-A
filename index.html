@@ -2,94 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Full-Page AZ-104 Images</title>
+  <title>AZ-104 Image Preview Gallery</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    html, body {
-      margin: 0;
-      background: #0f172a;
-      color: #e5e7eb;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    body { margin:0; background:#10101a; color:#fff; font-family:sans-serif; }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
+      gap: 12px;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 12px;
     }
-    .stack {
-      display: block;
-      max-width: 100%;
+    .thumb {
+      width: 100%; aspect-ratio: 4/3;
+      object-fit: cover; border-radius:8px; cursor:pointer;
+      background: #222; transition: box-shadow 0.3s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.18)
     }
-    figure {
-      margin: 0;
-      width: 100vw;           /* full viewport width */
-      min-height: 100vh;      /* section at least one screen tall while loading */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #0b1022;    /* placeholder color */
-    }
-    img {
-      width: 100vw;           /* fill width */
-      height: auto;           /* preserve aspect ratio */
-      display: block;
-      opacity: 0;
-      transition: opacity .35s ease;
-    }
-    img.loaded { opacity: 1; }
-
-    /* Optional: on very large screens, cap width to avoid huge decoding cost */
-    @media (min-width: 1400px) {
-      img { max-width: 1400px; width: 100%; }
-      figure { min-height: auto; padding: 20px 0; }
-    }
+    /* Modal styles */
+    #modal { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:99; }
+    #modal img { max-width:92vw; max-height:90vh; box-shadow:0 2px 18px #000; border-radius:10px; background:#15151e; }
   </style>
 </head>
 <body>
-  <main class="stack" id="gallery">
-    <!-- Replace with your filenames; keep zero-padded naming -->
-    <figure>
-      <img src="images/az-104-q-001.png"
-           alt="AZ-104 Question 001"
-           width="800" height="600"
-           loading="eager" fetchpriority="high" decoding="auto">
-    </figure>
+  <main class="gallery" id="gallery"></main>
 
-    <figure>
-      <img src="images/az-104-a-001.png"
-           alt="AZ-104 Answer 001"
-           width="800" height="600"
-           loading="lazy" decoding="async">
-    </figure>
-
-    <!-- Duplicate figure blocks for all remaining images (Q/A 002…700) -->
-  </main>
+  <!-- Modal for full-size preview -->
+  <div id="modal" onclick="closeModal()">
+    <img id="modalImg" src="" alt="Full Preview">
+  </div>
 
   <script>
-    // Optional fade-in after load
-    document.addEventListener('load', e => {
-      if (e.target.tagName === 'IMG') e.target.classList.add('loaded');
-    }, true);
-    document.querySelectorAll('img').forEach(img => {
-      if (img.complete) img.classList.add('loaded');
-    });
-
-    // Optional: auto-generate many images instead of manual duplication
-    // Uncomment and adjust if you prefer programmatic insertion.
-    /*
+    const total = 700, path = "images/", ext = ".png";
+    const pad = n => n.toString().padStart(3,'0');
     const gallery = document.getElementById('gallery');
-    const total = 700, base = 'images/', ext = '.png';
-    const pad3 = n => String(n).padStart(3, '0');
-    const add = (name, alt, eager=false) => {
-      const fig = document.createElement('figure');
-      fig.innerHTML = `<img src="${base}${name}${ext}" alt="${alt}"
-                        width="800" height="600"
-                        ${eager ? 'loading="eager" fetchpriority="high"' : 'loading="lazy" decoding="async"'}>`;
-      gallery.appendChild(fig);
-    };
-    // First hero
-    add(`az-104-q-${pad3(1)}`, `AZ-104 Question ${pad3(1)}`, true);
-    // Rest
-    for (let i=1;i<=700;i++){
-      if (i!==1) add(`az-104-q-${pad3(i)}`, `AZ-104 Question ${pad3(i)}`);
-      add(`az-104-a-${pad3(i)}`, `AZ-104 Answer ${pad3(i)}`);
+    // Build thumbnails (modify logic as per image naming)
+    for(let i=1;i<=total;i++){
+      ["q","a"].forEach(type => {
+        const img = document.createElement("img");
+        img.src = `${path}az-104-${type}-${pad(i)}${ext}`;
+        img.width = 180; img.height = 135; img.className = "thumb";
+        img.alt = `AZ-104 ${type.toUpperCase()} ${pad(i)}`;
+        img.loading = "lazy";
+        img.onclick = () => showModal(img.src, img.alt);
+        gallery.appendChild(img);
+      });
     }
-    */
+    function showModal(src, alt){
+      document.getElementById("modalImg").src = src;
+      document.getElementById("modalImg").alt = alt;
+      document.getElementById("modal").style.display = "flex";
+    }
+    function closeModal(){
+      document.getElementById("modalImg").src = "";
+      document.getElementById("modal").style.display = "none";
+    }
+    // Optional: close modal on ESC key
+    document.addEventListener("keydown", e =>
+      e.key==="Escape"?closeModal():null);
   </script>
 </body>
 </html>
