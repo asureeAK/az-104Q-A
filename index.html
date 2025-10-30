@@ -1,66 +1,82 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8">
-  <title>AZ-104 Image Preview Gallery</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Full Screen Image Viewer</title>
   <style>
-    body { margin:0; background:#10101a; color:#fff; font-family:sans-serif; }
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
-      gap: 12px;
-      max-width: 1200px;
-      margin: 20px auto;
-      padding: 0 12px;
+    body, html {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #222;
     }
-    .thumb {
-      width: 100%; aspect-ratio: 4/3;
-      object-fit: cover; border-radius:8px; cursor:pointer;
-      background: #222; transition: box-shadow 0.3s;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.18)
+    #img-container {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      justify-content: center;
+      align-items: center;
     }
-    /* Modal styles */
-    #modal { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:99; }
-    #modal img { max-width:92vw; max-height:90vh; box-shadow:0 2px 18px #000; border-radius:10px; background:#15151e; }
+    img {
+      max-width: 100vw;
+      max-height: 100vh;
+      object-fit: contain;
+      background: #222;
+    }
+    .nav-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 60px;
+      height: 60px;
+      background: rgba(32,32,32,0.7);
+      color: #fff;
+      font-size: 2em;
+      border: none;
+      cursor: pointer;
+      z-index: 99;
+    }
+    #prev { left: 10px; }
+    #next { right: 10px; }
   </style>
 </head>
 <body>
-  <main class="gallery" id="gallery"></main>
-
-  <!-- Modal for full-size preview -->
-  <div id="modal" onclick="closeModal()">
-    <img id="modalImg" src="" alt="Full Preview">
+  <button id="prev" class="nav-btn">&#8592;</button>
+  <div id="img-container">
+    <img id="main-img" src="1.png" alt="Image 1">
   </div>
+  <button id="next" class="nav-btn">&#8594;</button>
 
   <script>
-    const total = 700, path = "images/", ext = ".png";
-    const pad = n => n.toString().padStart(3,'0');
-    const gallery = document.getElementById('gallery');
-    // Build thumbnails (modify logic as per image naming)
-    for(let i=1;i<=total;i++){
-      ["q","a"].forEach(type => {
-        const img = document.createElement("img");
-        img.src = `${path}az-104-${type}-${pad(i)}${ext}`;
-        img.width = 180; img.height = 135; img.className = "thumb";
-        img.alt = `AZ-104 ${type.toUpperCase()} ${pad(i)}`;
-        img.loading = "lazy";
-        img.onclick = () => showModal(img.src, img.alt);
-        gallery.appendChild(img);
-      });
+    const totalImages = 400; // Updated to 400
+    let currentIndex = 1;
+
+    const img = document.getElementById('main-img');
+    const prev = document.getElementById('prev');
+    const next = document.getElementById('next');
+
+    function showImage(index) {
+      img.src = `${index}.png`;
+      img.alt = `Image ${index}`;
     }
-    function showModal(src, alt){
-      document.getElementById("modalImg").src = src;
-      document.getElementById("modalImg").alt = alt;
-      document.getElementById("modal").style.display = "flex";
-    }
-    function closeModal(){
-      document.getElementById("modalImg").src = "";
-      document.getElementById("modal").style.display = "none";
-    }
-    // Optional: close modal on ESC key
-    document.addEventListener("keydown", e =>
-      e.key==="Escape"?closeModal():null);
+
+    prev.onclick = function() {
+      if (currentIndex > 1) {
+        currentIndex--;
+        showImage(currentIndex);
+      }
+    };
+
+    next.onclick = function() {
+      if (currentIndex < totalImages) {
+        currentIndex++;
+        showImage(currentIndex);
+      }
+    };
+
+    document.onkeydown = function(e) {
+      if (e.key === "ArrowLeft") prev.click();
+      if (e.key === "ArrowRight") next.click();
+    };
   </script>
 </body>
 </html>
